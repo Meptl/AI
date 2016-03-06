@@ -1,0 +1,3 @@
+[submodule "viola_jones"]
+	path = viola_jones
+	url = https://github.com/Meptl/viola_jones
