@@ -3,7 +3,7 @@
 
 mod world;
 use std::io::BufRead;
-use world::{Tile, World};
+use world::{Algorithm, Tile, World};
 
 const USAGE_DESCRIPTION: &'static str =
     "vacuum-world-planner3 ALG [OPTIONS]
@@ -11,22 +11,13 @@ const USAGE_DESCRIPTION: &'static str =
              --depth-first
              --depth-first-id
              --breadth-first
-             --a-star HEURISTIC
-                 HEURISTIC is one of h0, h1, h2
+             --a-star
          -h --help
          -v --visual
          ";
 
-enum Algorithm {
-    DepthFirst,
-    DepthFirstIteratedDeepening,
-    BreadthFirst,
-    AStar
-}
-
 struct ProgramOptions {
     algorithm: Algorithm,
-    heuristic: usize,
     visual: bool,
 }
 
@@ -39,7 +30,6 @@ fn read_args() -> Option<ProgramOptions> {
     let mut args = std::env::args().skip(1);
     let mut opts = ProgramOptions {
         algorithm: Algorithm::DepthFirst,
-        heuristic: 0,
         visual: false,
     };
 
@@ -56,20 +46,7 @@ fn read_args() -> Option<ProgramOptions> {
             "--depth-first-id" =>
                 alg = Some(Algorithm::DepthFirstIteratedDeepening),
             "--breadth-first" => alg = Some(Algorithm::BreadthFirst),
-            "--a-star" => {
-                // Get next argument - heuristic value
-                let heu = match args.next() {
-                    Some(arg) => arg,
-                    None => return None,
-                };
-                match heu.as_ref() {
-                    "h0" => opts.heuristic = 0,
-                    "h1" => opts.heuristic = 1,
-                    "h2" => opts.heuristic = 2,
-                    _ => return None,
-                }
-                alg = Some(Algorithm::AStar)
-            },
+            "--a-star" => alg = Some(Algorithm::AStar),
             "--help" => return None,
             "-h" => return None,
             "--visual" => opts.visual = true,
@@ -186,11 +163,20 @@ fn read_world() -> Option<World> {
 }
 
 fn main() {
-    let opts = read_args();
-    if opts.is_none() {
-        usage();
-        return;
-    }
+    let opts = match read_args() {
+        Some(o) => o,
+        None =>  {
+            usage();
+            return;
+        }
+    };
 
-    let world = read_world();
+    let world = match read_world() {
+        Some(w) => w,
+        None => return,
+    };
+
+    for action in World::path_find(&world, opts.algorithm) {
+        println!("{}", action);
+    }
 }
