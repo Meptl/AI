@@ -25,7 +25,7 @@ fn usage() {
     println!("{}", USAGE_DESCRIPTION);
 }
 
-/// Reads program arguments for algorithm type
+/// Reads program arguments for algorithm type.
 fn read_args() -> Option<ProgramOptions> {
     let mut args = std::env::args().skip(1);
     let mut opts = ProgramOptions {
@@ -176,7 +176,7 @@ fn main() {
         None => return,
     };
 
-    for action in World::path_find(&world, opts.algorithm) {
+    for action in World::path_find(world, opts.algorithm) {
         println!("{}", action);
     }
 }
